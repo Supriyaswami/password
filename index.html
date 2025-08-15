@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        input[type="number"], input[type="text"] {
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            margin: 5px 0;
+            width: 80%;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #ff7eb3;
+            color: white;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #ff5d9e;
+        }
+        .checkbox {
+            text-align: left;
+            margin: 5px 0;
+        }
+        .password-box {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🔐 Password Generator</h2>
+        
+        <label>Password Length:</label><br>
+        <input type="number" id="length" value="12" min="4" max="50"><br>
+        
+        <div class="checkbox">
+            <input type="checkbox" id="letters" checked> Include Letters<br>
+            <input type="checkbox" id="numbers" checked> Include Numbers<br>
+            <input type="checkbox" id="symbols" checked> Include Symbols<br>
+        </div>
+
+        <label>Exclude Characters:</label><br>
+        <input type="text" id="exclude" placeholder="e.g. O0lI"><br>
+
+        <button onclick="generatePassword()">Generate</button>
+        <div class="password-box" id="password">Your password will appear here</div>
+        <button onclick="copyPassword()">Copy to Clipboard</button>
+    </div>
+
+    <script>
+        async function generatePassword() {
+            const length = parseInt(document.getElementById("length").value);
+            const letters = document.getElementById("letters").checked;
+            const numbers = document.getElementById("numbers").checked;
+            const symbols = document.getElementById("symbols").checked;
+            const exclude = document.getElementById("exclude").value;
+
+            try {
+                const res = await fetch("https://pass-wtu1.onrender.com/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        length: length,
+                        letters: letters,
+                        numbers: numbers,
+                        symbols: symbols,
+                        exclude: exclude
+                    })
+                });
+
+                const data = await res.json();
+                if (data.password) {
+                    document.getElementById("password").textContent = data.password;
+                } else {
+                    alert(data.error || "Something went wrong");
+                }
+            } catch (err) {
+                alert("Error connecting to backend");
+            }
+        }
+
+        function copyPassword() {
+            const password = document.getElementById("password").textContent;
+            if (password && password !== "Your password will appear here") {
+                navigator.clipboard.writeText(password);
+                alert("Password copied to clipboard!");
+            } else {
+                alert("No password to copy.");
+            }
+        }
+    </script>
+
+</body>
+</html>
